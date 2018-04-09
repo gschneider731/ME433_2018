@@ -83,7 +83,21 @@ int main() {
     while(1) {
 	// use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
 	// remember the core timer runs at half the sysclk
+        //set core timer to zero
         _CP0_SET_COUNT(0);
-        _CP0_GET_COUNT();
+        //turn on LED
+        LATAbits.LATA4 = 0;
+        //wait 0.5 ms and exit if button pressed
+        while (_CP0_GET_COUNT() < 12000 && PORTBbits.RB4 == 1)
+        {
+           
+        }
+        //turn off LED
+        LATAbits.LATA4 = 1;
+        //wait 0.5 ms and exit if button pressed
+        while (_CP0_GET_COUNT() < 24000 && PORTBbits.RB4 == 1)
+        {
+           
+        }
     }
 }
