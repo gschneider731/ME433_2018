@@ -145,7 +145,8 @@ int main(void) {
     TRISBbits.TRISB4 = 1;
 
     
-    int count = 1;
+    int count1 = 1;
+    int count2 = 1;
     char vtrimax;
     char vtri;
   while(1) {
@@ -161,25 +162,33 @@ int main(void) {
         
     }
     
-    char vsine = floor(512*sin(((2*3.14*10)*count)+1));
+    char vsine = floor(512*sin(((2*3.14*10)*count1)+1));
     
-    if(count <= 500)
+    if(count2 <= 100)
     {
-        vtri = floor(512 * count/1000);
+        vtri = floor(512 * count2/1000);
         vtrimax = vtri;
     }
-    if(count > 500)
+    if(count2 > 100)
     {
-        vtri = floor(vtrimax - (512 * (count-500)/1000));
+        vtri = floor(vtrimax - (512 * (count2-500)/1000));
     }
     
     setVoltage(1,vsine);
     setVoltage(0,vtri);
     
-    if(count>1000)
+    count1 = count1 + 1;
+    count2 = count2 + 1;
+    
+    if(count2>200)
     {
-        count = 0;
-        _CP0_SET_COUNT() = 0;
+        count2 = 0;
+    }
+    
+    if(count1>1000)
+    {
+        count1 = 0;
+        _CP0_SET_COUNT(0);
     }
     
     
