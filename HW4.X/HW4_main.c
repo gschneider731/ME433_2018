@@ -63,10 +63,12 @@ void int_spi()
     TRISAbits.TRISA0 = 0;
   CS = 1;
   
+  ANSELAbits.ANSA1 = 0;
+  
    //not sure where these go
   RPB15Rbits.RPB15R = 0b0011; //define SS1 as RPB15
-  RPB13Rbits.RPB13R = 0b0011; //define SDO1 as RPB13
-  SDI1Rbits.SDI1R = 0b0000; //define SDI1 as RPA1
+  //RPB13Rbits.RPB13R = 0b0011; //define SDO1 as RPB13
+  RPA1Rbits.RPA1R = 0b0011; //define RPA1 as SDO to go into SDI
 
   // setup spi1
   SPI1CON = 0;              // turn off the spi module and reset it
@@ -105,8 +107,8 @@ void setVoltage(char channel, int voltage)
     
     CS = 0;
     
-    a = spi_io(a>>10);
-    a = spi_io(a);
+    spi_io(a>>10);
+    spi_io(a);
     
     CS = 1;
     
@@ -149,12 +151,13 @@ int main(void) {
     int count2 = 1;
     char vtrimax;
     char vtri;
-  while(1) {
-    //set voltage function
     _CP0_SET_COUNT(0);
     
-    //setVoltage(1,512);
-    //setVoltage(0,512/2);
+  while(1) {
+    //set voltage function
+    
+    setVoltage(1,512);
+    setVoltage(0,512/2);
     //float f = 512 + 512 
     
     while(_CP0_GET_COUNT()<24000000/1000)
@@ -174,8 +177,8 @@ int main(void) {
         vtri = floor(vtrimax - (512 * (count2-500)/1000));
     }
     
-    setVoltage(1,vsine);
-    setVoltage(0,vtri);
+    //setVoltage(1,vsine);
+    //setVoltage(0,vtri);
     
     count1 = count1 + 1;
     count2 = count2 + 1;
