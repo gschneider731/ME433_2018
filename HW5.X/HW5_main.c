@@ -53,68 +53,9 @@
 #define PB PORTBbits.RB4
 #define LED LATAbits.LATA4
 
-//#define LDAC LATBbits.LATB7 = 1;
-#define SHDN LATBbits.LATB9 = 0;
-
 #define CS LATAbits.LATA0       // chip select pin
 
 #define addr 0b0100000
-
-//void int_spi()
-//{
-//    TRISAbits.TRISA0 = 0;
-//  CS = 1;
-//  
-//  ANSELAbits.ANSA1 = 0;
-//  
-//   //not sure where these go
-//  RPB15Rbits.RPB15R = 0b0011; //define SS1 as RPB15
-//  //RPB13Rbits.RPB13R = 0b0011; //define SDO1 as RPB13
-//  RPA1Rbits.RPA1R = 0b0011; //define RPA1 as SDO to go into SDI
-//
-//  // setup spi1
-//  SPI1CON = 0;              // turn off the spi module and reset it
-//  SPI1BUF;                  // clear the rx buffer by reading from it
-//  SPI1BRG = 0x1000;            // baud rate to 10 MHz [SPI4BRG = (80000000/(2*desired))-1]
-//  SPI1STATbits.SPIROV = 0;  // clear the overflow bit
-//  SPI1CONbits.CKE = 1;      // data changes when clock goes from hi to lo (since CKP is 0)
-//  SPI1CONbits.MSTEN = 1;    // master operation
-//  SPI1CONbits.ON = 1;       // turn on spi 4
-//    
-//    
-//}
-//
-//// send a byte via spi and return the response
-//unsigned char spi_io(unsigned char o) {
-//  SPI1BUF = o;
-//  while(!SPI1STATbits.SPIRBF) { // wait to receive the byte
-//    ;
-//  }
-//  return SPI1BUF;
-//}
-//
-//void setVoltage(char channel, int voltage)
-//{
-//    unsigned char a = 0b0000000000000000;
-//    //bit shift channel to bit 15 (total 16 bits cuz bit 0)
-//    a |= channel << 15;
-//    //bit shift buffer bit
-//    a |= 0b1 << 14;
-//    //bit shift gain bit
-//    a |= 0b1 << 13;
-//    //bit shift SHDN bit
-//    a |= 0b1 << 12;
-//    //bit shift voltage (next 10 bits)
-//    a |= voltage << 2;
-//    
-//    CS = 0;
-//    
-//    spi_io(a>>10);
-//    spi_io(a);
-//    
-//    CS = 1;
-//    
-//}
 
 unsigned char readi2c()
 {
@@ -142,7 +83,7 @@ void initExpander()
 {
     ANSELBbits.ANSB2 = 0;
     ANSELBbits.ANSB3 = 0;
-    i2c_master_setup();
+    //i2c_master_setup();
     
     writei2c(0x00,0b11110000);
     writei2c(0x0A,0b00001111);
@@ -184,6 +125,8 @@ int main(void) {
     // do your TRIS and LAT commands here
     TRISAbits.TRISA4 = 0;
     TRISBbits.TRISB4 = 1;
+    TRISBbits.TRISB2 = 0;
+    TRISBbits.TRISB3 = 0;
 
     
 //    int count1 = 1;
@@ -191,78 +134,47 @@ int main(void) {
 //    char vtrimax;
 //    char vtri;
 //    _CP0_SET_COUNT(0);
-    
+    //setExpander(1,0);
+    writei2c(0x0A,1);
     unsigned char r;
+    _CP0_SET_COUNT(0);
+    int turn = 0;
+    LATAbits.LATA4 = 0;
   while(1) {
       
       r = getExpander();
       r = r>>7; //pin 7
-      if(r == 1)
+      if((r>>7) == 0)
       {
-          setExpander(1,0);
+          //setExpander(1,0);
+          writei2c(0x0A,1);
       }
       else
       {
-          setExpander(0,0);
-      }
+          //setExpander(0,0);
+          writei2c(0x0A,0);
+      }    
       
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-//    //set voltage function
-//    
-//    setVoltage(1,512);
-//    setVoltage(0,512/2);
-//    //float f = 512 + 512 
-//    
-//    while(_CP0_GET_COUNT()<24000000/1000)
-//    {
-//        
-//    }
-//    
-//    char vsine = floor(512*sin(((2*3.14*10)*count1)+1));
-//    
-//    if(count2 <= 100)
-//    {
-//        vtri = floor(512 * count2/1000);
-//        vtrimax = vtri;
-//    }
-//    if(count2 > 100)
-//    {
-//        vtri = floor(vtrimax - (512 * (count2-500)/1000));
-//    }
-//    
-//    //setVoltage(1,vsine);
-//    //setVoltage(0,vtri);
-//    
-//    count1 = count1 + 1;
-//    count2 = count2 + 1;
-//    
-//    if(count2>200)
-//    {
-//        count2 = 0;
-//    }
-//    
-//    if(count1>1000)
-//    {
-//        count1 = 0;
-//        _CP0_SET_COUNT(0);
-//    }
-//    
+      //blinking light
+       //wait 0.5 ms and exit if button pressed
+        if (_CP0_GET_COUNT() < 12000 && PORTBbits.RB4 == 1 && turn == 1)
+        {
+            //reset
+            _CP0_SET_COUNT(0);
+            if(turn = 0)
+            {
+                //turn off LED
+                LATAbits.LATA4 = 1;
+                turn = 1;
+            }
+            else
+            {
+                //turn on LED
+                LATAbits.LATA4 = 0;
+                turn = 0;
+            }
+           
+        }
     
   }
   return 0;
