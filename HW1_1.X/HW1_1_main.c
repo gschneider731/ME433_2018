@@ -86,20 +86,20 @@ int main() {
         //set core timer to zero
         _CP0_SET_COUNT(0);
         //turn on LED
-        LATAbits.LATA4 = 0;
+        LATAbits.LATA4 = 1;
         
         //wait 0.5 ms and exit if button pressed
         while (_CP0_GET_COUNT() < 12000 && PORTBbits.RB4 == 1)
         {
            //turn on LED
-           LATAbits.LATA4 = 0;
+           LATAbits.LATA4 = 1;
         }
         
         //wait 0.5 ms and exit if button pressed
         while (_CP0_GET_COUNT() < 24000 && PORTBbits.RB4 == 1)
         {
            //turn off LED
-           LATAbits.LATA4 = 1;
+           LATAbits.LATA4 = 0;
         }
     }
 }
