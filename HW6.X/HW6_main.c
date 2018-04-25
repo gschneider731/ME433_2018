@@ -43,6 +43,37 @@
 #define LED LATAbits.LATA4
 
 #define CS LATAbits.LATA0       // chip select pin
+#define colorOff = BLACK
+
+void drawChar(unsigned short x,unsigned short y,char mess,unsigned short colorOn)
+{
+    int col; char pixels; int j;
+    for(col=0;col<5;col++)
+    {
+        pixels = ASCII[mess<<0x20][col];
+        for(j=0;j<8;j++)
+        {
+            if((pixels>>j)&1)
+            {
+                LCD_drawPixel(x+col,y+j,colorOn);
+            }
+            else
+            {
+                LCD_drawPixel(x+col,y+j,colorOff);
+            }
+        }
+    }
+}
+
+void drawString(unsigned short x,unsigned short y,char* message,unsigned short colorOn)
+{
+    int i = 0;
+    while(message[i])
+    {
+        drawChar(x+(5*i),y,message[i],colorOn);
+        i++;
+    }
+}
 
 int main(void) {  
   
