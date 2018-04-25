@@ -2,7 +2,7 @@
 #include<sys/attribs.h>  // __ISR macro
 #include<math.h>
 #include<stdio.h>
-#include<ST7735.h>
+#include "ST7735.h"
 
 // DEVCFG0
 #pragma config DEBUG = OFF // no debugging
@@ -41,16 +41,16 @@
 
 #define PB PORTBbits.RB4
 #define LED LATAbits.LATA4
+#define LCD LATBbits.LATB15
 
 #define CS LATAbits.LATA0       // chip select pin
-#define colorOff = BLACK
 
-void drawChar(unsigned short x,unsigned short y,char mess,unsigned short colorOn)
+void drawChar(unsigned short x,unsigned short y,char mess,unsigned short colorOn,unsigned short colorOff)
 {
     int col; char pixels; int j;
     for(col=0;col<5;col++)
     {
-        pixels = ASCII[mess<<0x20][col];
+        pixels = ASCII[mess-0x20][col];
         for(j=0;j<8;j++)
         {
             if((pixels>>j)&1)
@@ -65,19 +65,53 @@ void drawChar(unsigned short x,unsigned short y,char mess,unsigned short colorOn
     }
 }
 
-void drawString(unsigned short x,unsigned short y,char* message,unsigned short colorOn)
+void drawString(unsigned short x,unsigned short y,char* message,unsigned short colorOn,unsigned short colorOff)
 {
     int i = 0;
     while(message[i])
     {
-        drawChar(x+(5*i),y,message[i],colorOn);
+        drawChar(x+(5*i),y,message[i],colorOn,colorOff);
         i++;
+    }
+}
+void drawBarBackground(unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
+{
+    unsigned short left; unsigned short right; unsigned short top; unsigned short bottom;
+    left = x - 1;
+    right = x + length + 1;
+    top = y + 1;
+    bottom = y - height - 1;
+    int count;
+    //draw top and bottom
+    for(count=0;count<=(length+2);count++)
+    {
+        LCD_drawPixel(left+count, top, color);
+        LCD_drawPixel(left+count, bottom, color);
+    }
+    //draw left and right
+    for(count=0;count<=(height+2);count++)
+    {
+        LCD_drawPixel(left, top-count, color);
+        LCD_drawPixel(right, top-count, color);
+    }
+}
+void drawProgressBar(unsigned short progress,unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
+{
+    int count;
+    if(progress >=0 && progress <= length+1)
+    {
+        for(count=0;count<=(height);count++)
+        {
+            LCD_drawPixel(progress+x, y-count, color);
+        }
     }
 }
 
 int main(void) {  
   
   __builtin_disable_interrupts();
+  LCD_init();
+  LCD_clearScreen(BLACK);
 
     // set the CP0 CONFIG register to indicate that kseg0 is cacheable (0x3)
     __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
@@ -96,14 +130,53 @@ int main(void) {
     TRISBbits.TRISB4 = 1;
     TRISBbits.TRISB2 = 0;
     TRISBbits.TRISB3 = 0;
+    TRISBbits.TRISB15 = 0;
 
+    SDI1Rbits.SDI1R = 0b0100; //define SDI1 as RPB8
+    RPA1Rbits.RPA1R = 0b0011; //define SDO1 as RPA1
+    RPB7Rbits.RPB7R = 0b0011; //define RPB7 as SS 
     
-  while(1) 
-  {    
-      //setup background
-      //draw line
-      //draw a character
-      //draw a string of text
+    __builtin_enable_interrupts();
+    
+//    //draw line
+//    int p;
+//    for(p=0;p<50;p++)
+//    {
+//        LCD_drawPixel(p, 5, WHITE);
+//    }
+    
+    //draw character
+//    drawChar(1,1,'A',WHITE,BLACK);
+    
+    //draw string
+//    char message[30];
+//    sprintf(message,"Hello");
+//    drawString(1,1,message,WHITE,BLACK);
+  
+    //create background for bar
+    unsigned short length = 100; unsigned short height = 10;
+    unsigned short barx = 14; unsigned short bary = 60;
+    drawBarBackground(barx,bary,length,height,WHITE);
+   // drawProgressBar(50,barx,bary,length,height,RED);
+    
+    //show progress to 100
+    int count;
+    char message[30];
+    for(count=0;count<=length;count++)
+    {
+        _CP0_SET_COUNT(0);
+        sprintf(message,"Hello World %d",count);
+        drawString(28,32,message,WHITE,BLACK);
+        drawProgressBar(count,barx,bary,length,height,RED);
+        while (_CP0_GET_COUNT() < 1200000)
+        {
+           
+        }
+    }
+    
+    while(1) 
+  {
+        
   }
   return 0;
 }
