@@ -336,52 +336,139 @@ void drawProgressBar(signed int progressx,signed int progressy,unsigned short x,
             //drawString(1,65,message,WHITE,BLACK);
         }
     }
-    if(progressx > 0 && progressx <= length+1)
+   
+    
+    
+    
+    
+    //color x positive
+    for(countx=0;countx<=(length);countx++)
     {
-        for(countx=0;countx<=(progressx);countx++)
+        if(progressx == 0)
         {
+            
+        }
+        else if(progressx > 0 && progressx <= length+1 && countx <= progressx)
+        {
+            
             for(county=0;county<=(2*(height-1));county++)
             {
+                //color green
                 LCD_drawPixel(x+height+countx, y-height+1+county, color);
+                //color opposite side black
+                //LCD_drawPixel(x-height-countx, y-height+1+county, BLACK);
+
                 sprintf(message,"HERE2");
-            drawString(1,65,message,WHITE,BLACK);
+                drawString(1,65,message,WHITE,BLACK);
             }
+        
         }
-    }
-    if(progressx < 0 && progressx <= length+1)
-    {
-        for(countx=0;countx<=(progressx);countx++)
+        //color rest black
+        else
         {
             for(county=0;county<=(2*(height-1));county++)
             {
+                //color green
+                LCD_drawPixel(x+height+countx, y-height+1+county, BLACK);
+            }
+        }
+    } 
+    //color x negative
+    for(countx=0;countx<=(length);countx++)
+    {
+        if(progressx == 0)
+        {
+            
+        }
+        else if(progressx < 0 && (-progressx) <= length+1 && countx <= (-progressx))
+        {
+            
+            for(county=0;county<=(2*(height-1));county++)
+            {
+                //color green
                 LCD_drawPixel(x-height-countx, y-height+1+county, color);
+                //color opposite side black
+                //LCD_drawPixel(x-height-countx, y-height+1+county, BLACK);
+
                 sprintf(message,"HERE3");
-            drawString(1,65,message,WHITE,BLACK);
+                drawString(1,65,message,WHITE,BLACK);
             }
+        
         }
-    }
-    if(progressy > 0 && progressy <= length+1)
-    {
-        for(countx=0;countx<=(progressy);countx++)
+        //color rest black
+        else 
         {
             for(county=0;county<=(2*(height-1));county++)
             {
-                LCD_drawPixel(x+height-1-county, y+height+countx, color);
-            sprintf(message,"HERE4");
-            drawString(1,65,message,WHITE,BLACK);
+                //color green
+                LCD_drawPixel(x-height-countx, y-height+1+county, BLACK);
             }
         }
-    }
-    if(progressy < 0 && progressy <= length+1)
+    } 
+            
+          
+    //color y positive
+    for(countx=0;countx<=(length);countx++)
     {
-        for(countx=0;countx<=(progressy);countx++)
+        if(progressy == 0)
+        {
+            
+        }
+        else if(progressy > 0 && progressy <= length+1 && countx <= progressy)
+        {
+            
+            for(county=0;county<=(2*(height-1));county++)
+            {
+                //color green
+                LCD_drawPixel(x-height+1+county,y+height+countx, color);
+                //color opposite side black
+                //LCD_drawPixel(x-height-countx, y-height+1+county, BLACK);
+
+                sprintf(message,"HERE4");
+                drawString(1,65,message,WHITE,BLACK);
+            }
+        
+        }
+        //color rest black
+        else 
         {
             for(county=0;county<=(2*(height-1));county++)
             {
-                LCD_drawPixel(x+height-1-county, y-height-countx, color);
-            sprintf(message,"HERE5");
-            drawString(1,65,message,WHITE,BLACK);
+                //color green
+                LCD_drawPixel(x-height+1+county,y+height+countx, BLACK);
             }
         }
-    }
+    } 
+    //color y negative
+    for(countx=0;countx<=(length);countx++)
+    {
+        if(progressy == 0)
+        {
+            
+        }
+        else if(progressy < 0 && (-progressy) <= length+1 && countx <= (-progressy))
+        {
+            
+            for(county=0;county<=(2*(height-1));county++)
+            {
+                //color green
+                LCD_drawPixel(x-height+1+county,y-height-countx, color);
+                //color opposite side black
+                //LCD_drawPixel(x-height-countx, y-height+1+county, BLACK);
+
+                sprintf(message,"HERE5");
+                drawString(1,65,message,WHITE,BLACK);
+            }
+        
+        }
+        //color rest black
+        else 
+        {
+            for(county=0;county<=(2*(height-1));county++)
+            {
+                //color green
+                LCD_drawPixel(x-height+1+county,y-height-countx, BLACK);
+            }
+        }
+    } 
 }

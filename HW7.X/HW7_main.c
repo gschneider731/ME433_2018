@@ -110,8 +110,8 @@ int main(void) {
     
     float xacc; float yacc; float zacc;
     
-    drawBarBackground(64,111,40,5,WHITE);
-    drawProgressBar(0,0,64,111,40,5,GREEN);
+    drawBarBackground(64,111,40,2,WHITE);
+    drawProgressBar(0,0,64,111,40,2,GREEN);
 
     
     
@@ -141,7 +141,7 @@ int main(void) {
     //scale 16000 to 40
     xacc = accelX/400;
     yacc = accelY/400;
-    zacc = accelZ/400;
+    zacc = -accelZ/400;
     
     
     sprintf(message,"TEMPERATURE: %d",temperature);
@@ -159,7 +159,7 @@ int main(void) {
     sprintf(message,"ACCELZ: %3.1f",zacc);
     drawString(1,57,message,WHITE,BLACK);
     
-    drawProgressBar(xacc,yacc,64,111,40,5,GREEN);
+    drawProgressBar(xacc,zacc,64,111,40,2,GREEN);
     
     LATAbits.LATA4=1;
             
