@@ -277,35 +277,100 @@ void drawString(unsigned short x,unsigned short y,char* message,unsigned short c
         i++;
     }
 }
-void drawBarBackground(unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
+void drawBarBackground(unsigned short midx,unsigned short midy,unsigned short length,unsigned short height,unsigned short color)
 {
     unsigned short left; unsigned short right; unsigned short top; unsigned short bottom;
-    left = x - 1;
-    right = x + length + 1;
-    top = y + 1;
-    bottom = y - height - 1;
+    left = midx - (1 + height) - length;
+    right = midx + length + 1 + height;
+    top = midy + 1 + height + length;
+    bottom = midy - length - (1 + height);
     int count;
-    //draw top and bottom
-    for(count=0;count<=(length+2);count++)
+    //draw top and bottom of left bar
+    for(count=0;count<=(length+1);count++)
     {
-        LCD_drawPixel(left+count, top, color);
-        LCD_drawPixel(left+count, bottom, color);
+        LCD_drawPixel(left+count, midy+height, color);
+        LCD_drawPixel(left+count, midy-height, color);
     }
-    //draw left and right
-    for(count=0;count<=(height+2);count++)
+    //draw top and bottom of right bar
+    for(count=0;count<=(length+1);count++)
     {
-        LCD_drawPixel(left, top-count, color);
-        LCD_drawPixel(right, top-count, color);
+        LCD_drawPixel(right-count, midy+height, color);
+        LCD_drawPixel(right-count, midy-height, color);
+    }
+    //draw left and right for top bar
+    for(count=0;count<=(length+1);count++)
+    {
+        LCD_drawPixel(midx+height, top-count, color);
+        LCD_drawPixel(midx-height, top-count, color);
+    }
+    //draw left and right for bottom bar
+    for(count=0;count<=(length+1);count++)
+    {
+        LCD_drawPixel(midx+height, bottom+count, color);
+        LCD_drawPixel(midx-height, bottom+count, color);
+    }
+    //draw top and bottom ends
+    for(count=0;count<(2*height+1);count++)
+    {
+        LCD_drawPixel(midx-height+count, top, color);
+        LCD_drawPixel(midx-height+count, bottom, color);
+    }
+    //draw left and right ends
+    for(count=0;count<(2*height+1);count++)
+    {
+        LCD_drawPixel(right, midy-height+count, color);
+        LCD_drawPixel(left, midy-height+count, color);
     }
 }
-void drawProgressBar(unsigned short progress,unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
+void drawProgressBar(unsigned int progressx,unsigned int progressy,unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
 {
-    int count;
-    if(progress >=0 && progress <= length+1)
+    int county; int countx;
+    //color middle
+    for(countx=0;countx<=(2*(height-1)+1);countx++)
     {
-        for(count=0;count<=(height);count++)
+        for(county=0;county<=(2*(height-1));county++)
         {
-            LCD_drawPixel(progress+x, y-count, color);
+            LCD_drawPixel(x-height+countx, y-height+county, color);
+        }
+    }
+    if(progressx > 0 && progressx <= length+1)
+    {
+        for(countx=0;countx<=(progressx);countx++)
+        {
+            for(county=0;county<=(height);county++)
+            {
+                LCD_drawPixel(x+height+progressx-countx, y-height+county, color);
+            }
+        }
+    }
+    if(progressx < 0 && progressx <= length+1)
+    {
+        for(countx=0;countx<=(progressx);countx++)
+        {
+            for(county=0;county<=(height);county++)
+            {
+                LCD_drawPixel(x-height-progressx+countx, y-height+county, color);
+            }
+        }
+    }
+    if(progressy > 0 && progressy <= length+1)
+    {
+        for(countx=0;countx<=(progressy);countx++)
+        {
+            for(county=0;county<=(height);county++)
+            {
+                LCD_drawPixel(x+height-county, y+height+progressx-countx, color);
+            }
+        }
+    }
+    if(progressy < 0 && progressy <= length+1)
+    {
+        for(countx=0;countx<=(progressy);countx++)
+        {
+            for(county=0;county<=(height);county++)
+            {
+                LCD_drawPixel(x+height-county, y-height-progressx+countx, color);
+            }
         }
     }
 }

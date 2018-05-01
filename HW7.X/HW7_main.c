@@ -110,6 +110,10 @@ int main(void) {
     
     float xacc; float yacc; float zacc;
     
+    drawBarBackground(64,111,40,5,WHITE);
+    drawProgressBar(0,0,64,111,40,5,GREEN);
+
+    
     
     __builtin_enable_interrupts();
     
@@ -155,13 +159,19 @@ int main(void) {
     sprintf(message,"ACCELZ: %3.1f",zacc);
     drawString(1,57,message,WHITE,BLACK);
     
+    drawProgressBar(xacc,yacc,64,111,40,5,GREEN);
+    
     LATAbits.LATA4=1;
             
-    while(_CP0_GET_COUNT()<24000000/10){ }
+    while(_CP0_GET_COUNT()<24000000/10)
+    { 
+    }
         
     _CP0_SET_COUNT(0);
     LATAbits.LATA4=0;
-    while(_CP0_GET_COUNT()<24000000/10){ }
+    while(_CP0_GET_COUNT()<24000000/10)
+    { 
+    }
    
   }
   return 0;
