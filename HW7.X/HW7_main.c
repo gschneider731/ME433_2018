@@ -138,10 +138,10 @@ int main(void) {
     accelY=(readdata[11]<<8)|readdata[10];
     accelZ=(readdata[13]<<8)|readdata[12];
     
-    //scale 16000 to 60
-    xacc = accelX/267;
-    yacc = accelY/267;
-    zacc = accelZ/267;
+    //scale 16000 to 40
+    xacc = accelX/400;
+    yacc = accelY/400;
+    zacc = accelZ/400;
     
     
     sprintf(message,"TEMPERATURE: %d",temperature);

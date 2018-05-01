@@ -322,24 +322,29 @@ void drawBarBackground(unsigned short midx,unsigned short midy,unsigned short le
         LCD_drawPixel(left, midy-height+count, color);
     }
 }
-void drawProgressBar(unsigned int progressx,unsigned int progressy,unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
+void drawProgressBar(signed int progressx,signed int progressy,unsigned short x,unsigned short y,unsigned short length,unsigned short height,unsigned short color)
 {
     int county; int countx;
+    char message[30];
     //color middle
-    for(countx=0;countx<=(2*(height-1)+1);countx++)
+    for(countx=0;countx<=(2*(height)+1);countx++)
     {
-        for(county=0;county<=(2*(height-1));county++)
+        for(county=0;county<=(2*(height));county++)
         {
             LCD_drawPixel(x-height+countx, y-height+county, color);
+            //sprintf(message,"HERE1");
+            //drawString(1,65,message,WHITE,BLACK);
         }
     }
     if(progressx > 0 && progressx <= length+1)
     {
         for(countx=0;countx<=(progressx);countx++)
         {
-            for(county=0;county<=(height);county++)
+            for(county=0;county<=(2*(height-1));county++)
             {
-                LCD_drawPixel(x+height+progressx-countx, y-height+county, color);
+                LCD_drawPixel(x+height+countx, y-height+1+county, color);
+                sprintf(message,"HERE2");
+            drawString(1,65,message,WHITE,BLACK);
             }
         }
     }
@@ -347,9 +352,11 @@ void drawProgressBar(unsigned int progressx,unsigned int progressy,unsigned shor
     {
         for(countx=0;countx<=(progressx);countx++)
         {
-            for(county=0;county<=(height);county++)
+            for(county=0;county<=(2*(height-1));county++)
             {
-                LCD_drawPixel(x-height-progressx+countx, y-height+county, color);
+                LCD_drawPixel(x-height-countx, y-height+1+county, color);
+                sprintf(message,"HERE3");
+            drawString(1,65,message,WHITE,BLACK);
             }
         }
     }
@@ -357,9 +364,11 @@ void drawProgressBar(unsigned int progressx,unsigned int progressy,unsigned shor
     {
         for(countx=0;countx<=(progressy);countx++)
         {
-            for(county=0;county<=(height);county++)
+            for(county=0;county<=(2*(height-1));county++)
             {
-                LCD_drawPixel(x+height-county, y+height+progressx-countx, color);
+                LCD_drawPixel(x+height-1-county, y+height+countx, color);
+            sprintf(message,"HERE4");
+            drawString(1,65,message,WHITE,BLACK);
             }
         }
     }
@@ -367,9 +376,11 @@ void drawProgressBar(unsigned int progressx,unsigned int progressy,unsigned shor
     {
         for(countx=0;countx<=(progressy);countx++)
         {
-            for(county=0;county<=(height);county++)
+            for(county=0;county<=(2*(height-1));county++)
             {
-                LCD_drawPixel(x+height-county, y-height-progressx+countx, color);
+                LCD_drawPixel(x+height-1-county, y-height-countx, color);
+            sprintf(message,"HERE5");
+            drawString(1,65,message,WHITE,BLACK);
             }
         }
     }
