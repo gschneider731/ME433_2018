@@ -1,6 +1,5 @@
 #include<xc.h>
 #include "i2c_master_noint.h"
-#define addr 0b00100001
 
 // I2C Master utilities, 100 kHz, using polling rather than interrupts
 // The functions must be callled in the correct order as per the I2C protocol
@@ -8,7 +7,7 @@
 // I2C pins need pull-up resistors, 2k-10k
 
 void i2c_master_setup(void) {
-  I2C2BRG = 53;            // I2CBRG = [1/(2*Fsck) - PGD]*Pblck - 2
+  I2C2BRG = 235;            // I2CBRG = [1/(2*Fsck) - PGD]*Pblck - 2
                                     // look up PGD for your PIC32
   I2C2CONbits.ON = 1;               // turn on the I2C1 module
 }
@@ -50,7 +49,7 @@ void i2c_master_stop(void) {          // send a STOP:
   while(I2C2CONbits.PEN) { ; }        // wait for STOP to complete
 }
 
-void initExpander()
+void initExpander(unsigned char addr)
 {
     ANSELBbits.ANSB2 = 0;
     ANSELBbits.ANSB3 = 0;
@@ -63,39 +62,74 @@ void initExpander()
     i2c_master_stop();
 }
 
-void setExpander(unsigned char pin, unsigned char level)
+void setExpander(unsigned char addr, unsigned char pin, unsigned char level)
 {
     unsigned char val = 0x00;
     val = (val|level)<<pin;
     unsigned char reg = 0x0A;
-    writei2c(reg,val);
+    writei2c(addr,reg,val);
     
 }
 
-unsigned char getExpander()
+unsigned char getExpander(unsigned char addr)
 {
-    unsigned char val = readi2c(0x09);
+    unsigned char val = readi2c(addr,0x09);
     return val;
 }
 
-unsigned char readi2c(unsigned char reg)
+unsigned char readi2c(unsigned char addr, unsigned char reg)
 {
+    unsigned char r = 0;
     i2c_master_start();
-    i2c_master_send(addr<<1|0);
+    i2c_master_send(addr<<1);
     i2c_master_send(reg);
     i2c_master_restart();
     i2c_master_send(addr<<1|1);
-    unsigned char r = i2c_master_recv();
+    r=i2c_master_recv();
     i2c_master_ack(1);
     i2c_master_stop();
     return r;
 }
 
-void writei2c(unsigned char reg, unsigned char val)
+void writei2c(unsigned char addr, unsigned char reg, unsigned char val)
 {
     i2c_master_start();
-    i2c_master_send(addr<<1|0);
+    i2c_master_send(addr<<1);
     i2c_master_send(reg);
     i2c_master_send(val);
     i2c_master_stop();
 }
+
+void initIMU(unsigned char addr){
+    ANSELBbits.ANSB2 = 0;
+    ANSELBbits.ANSB3 = 0;
+    writei2c(addr, 0x0B, 0b00000010);
+    writei2c(addr, 0x10, 0b10000000); 
+    writei2c(addr, 0x11, 0b10000000);  
+    writei2c(addr, 0x12, 0b100); 
+}
+
+void i2cMultipleRead(unsigned char addr, unsigned char reg, unsigned char *data)
+{
+    int i = 0;
+    i2c_master_start();
+    i2c_master_send(addr<<1);
+    i2c_master_send(reg);
+    i2c_master_restart();
+    i2c_master_send(addr<<1|1);
+    for(i=0;i<14;i++)
+    {
+        data[i]=i2c_master_recv();
+        if(i<13)
+        {
+            i2c_master_ack(0);
+        }
+        else
+        {
+            i2c_master_ack(1);
+        }
+    }
+    
+    i2c_master_stop();
+}
+

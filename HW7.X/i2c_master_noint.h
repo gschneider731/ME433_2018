@@ -11,10 +11,12 @@ void i2c_master_send(unsigned char byte); // send a byte (either an address or d
 unsigned char i2c_master_recv(void);      // receive a byte of data
 void i2c_master_ack(int val);             // send an ACK (0) or NACK (1)
 void i2c_master_stop(void);               // send a stop
-void initExpander();
-void setExpander(unsigned char pin, unsigned char level);
-unsigned char getExpander();
-unsigned char readi2c(unsigned char reg);
-void writei2c(unsigned char reg, unsigned char val);
+void initExpander(unsigned char addr);
+void setExpander(unsigned char addr, unsigned char pin, unsigned char level);
+unsigned char getExpander(unsigned char addr);
+unsigned char readi2c(unsigned char addr, unsigned char reg);
+void writei2c(unsigned char addr, unsigned char reg, unsigned char val);
+void initIMU(unsigned char addr);
+void i2cMultipleRead(unsigned char addr, unsigned char reg, unsigned char *data);
 
 #endif
