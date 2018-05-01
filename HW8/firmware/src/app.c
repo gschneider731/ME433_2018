@@ -54,6 +54,12 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 // *****************************************************************************
 
 #include "app.h"
+#include<xc.h>           // processor SFR definitions
+#include<sys/attribs.h>  // __ISR macro
+#include<math.h>
+#include<stdio.h>
+#include "i2c_master_noint.h"
+#include "ST7735.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -123,8 +129,26 @@ void APP_Initialize ( void )
      */
     #define PB PORTBbits.RB4
     #define LED LATAbits.LATA4
+    #define LCD LATBbits.LATB15
+    #define CS LATAbits.LATA0       // chip select pin
+    #define LSM 0b01101011
+
+    LCD_init();
+    LCD_clearScreen(BLACK);
+    
     TRISAbits.TRISA4 = 0;
     TRISBbits.TRISB4 = 1;
+    TRISBbits.TRISB2 = 0;
+    TRISBbits.TRISB3 = 0;
+    TRISBbits.TRISB15 = 0;
+
+    i2c_master_setup();
+    initIMU(LSM);
+    
+    drawBarBackground(64,111,40,2,WHITE);
+    drawProgressBar(0,0,64,111,40,2,GREEN);
+    
+    
 }
 
 
@@ -158,25 +182,73 @@ void APP_Tasks ( void )
 
         case APP_STATE_SERVICE_TASKS:
         {
-            //set core timer to zero
+            unsigned char r;
+    
+            int turn = 1;
+
+            char message[30];
+            char readdata[15];
+            unsigned char whoami;
+
+            signed short temperature; signed short gyroX; signed short gyroY;
+            signed short gyroZ; signed short accelX;
+            signed short accelY; signed short accelZ;
+
+            float xacc; float yacc; float zacc;
+            
             _CP0_SET_COUNT(0);
-            //turn off LED
-            LATAbits.LATA4 = 0;
-        
-            //wait 0.5 ms and exit if button pressed
-            while (_CP0_GET_COUNT() < 24000000/10 && PORTBbits.RB4 == 1)
-            {
-                //turn on LED
-                LATAbits.LATA4 = 1;
+   
+    
+            whoami = readi2c(LSM,0x0F);
+            sprintf(message,"WHO AM I: %d",whoami);
+            drawString(1,1,message,WHITE,BLACK);
+
+            i2cMultipleRead(LSM, 0X20, readdata);
+
+
+            temperature=(readdata[1]<<8)|readdata[0];
+            gyroX=(readdata[3]<<8)|readdata[2];
+            gyroY=(readdata[5]<<8)|readdata[4];
+            gyroZ=(readdata[7]<<8)|readdata[6];
+            accelX=(readdata[9]<<8)|readdata[8];
+            accelY=(readdata[11]<<8)|readdata[10];
+            accelZ=(readdata[13]<<8)|readdata[12];
+
+            //scale 16000 to 40
+            xacc = accelX/400;
+            yacc = accelY/400;
+            zacc = -accelZ/400;
+
+
+            sprintf(message,"TEMPERATURE: %d",temperature);
+            drawString(1,9,message,WHITE,BLACK);
+            sprintf(message,"GYROX: %d",gyroX);
+            drawString(1,17,message,WHITE,BLACK);
+            sprintf(message,"GYROY: %d",gyroY);
+            drawString(1,25,message,WHITE,BLACK);
+            sprintf(message,"GYROZ: %d",gyroZ);
+            drawString(1,33,message,WHITE,BLACK);
+            sprintf(message,"ACCELX: %3.1f",xacc);
+            drawString(1,41,message,WHITE,BLACK);
+            sprintf(message,"ACCELY: %3.1f",yacc);
+            drawString(1,49,message,WHITE,BLACK);
+            sprintf(message,"ACCELZ: %3.1f",zacc);
+            drawString(1,57,message,WHITE,BLACK);
+
+            drawProgressBar(xacc,zacc,64,111,40,2,GREEN);
+
+            LATAbits.LATA4=1;
+
+            while(_CP0_GET_COUNT()<24000000/10)
+            { 
             }
+
             _CP0_SET_COUNT(0);
-        
-            //wait 0.5 ms and exit if button pressed
-            while (_CP0_GET_COUNT() < 24000000/10 && PORTBbits.RB4 == 1)
-            {
-                //turn off LED
-                LATAbits.LATA4 = 0;
+            LATAbits.LATA4=0;
+            while(_CP0_GET_COUNT()<24000000/10)
+            { 
             }
+   
             break;
         }
 
