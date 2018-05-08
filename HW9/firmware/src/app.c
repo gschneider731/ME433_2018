@@ -62,7 +62,7 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
 
 uint8_t APP_MAKE_BUFFER_DMA_READY dataOut[APP_READ_BUFFER_SIZE];
 uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
-int len, i = 0;
+int len, i = 1;
 int startTime = 0; // to remember the loop time
 int j; int k;
 
@@ -352,8 +352,8 @@ void APP_Initialize(void) {
     i2c_master_setup();
     initIMU(LSM);
     
-    drawBarBackground(64,111,40,2,WHITE);
-    drawProgressBar(0,0,64,111,40,2,GREEN);
+    //drawBarBackground(64,111,40,2,WHITE);
+    //drawProgressBar(0,0,64,111,40,2,GREEN);
 
     startTime = _CP0_GET_COUNT();
 }
@@ -512,6 +512,23 @@ void APP_Tasks(void) {
                 xacc = accelX/400;
                 yacc = accelY/400;
                 zacc = -accelZ/400;
+                
+                sprintf(message,"TEMPERATURE: %d",temperature);
+                drawString(1,9,message,WHITE,BLACK);
+                sprintf(message,"GYROX: %d",gyroX);
+                drawString(1,17,message,WHITE,BLACK);
+                sprintf(message,"GYROY: %d",gyroY);
+                drawString(1,25,message,WHITE,BLACK);
+                sprintf(message,"GYROZ: %d",gyroZ);
+                drawString(1,33,message,WHITE,BLACK);
+                sprintf(message,"ACCELX: %3.1f",xacc);
+                drawString(1,41,message,WHITE,BLACK);
+                sprintf(message,"ACCELY: %3.1f",yacc);
+                drawString(1,49,message,WHITE,BLACK);
+                sprintf(message,"ACCELZ: %3.1f",zacc);
+                drawString(1,57,message,WHITE,BLACK);
+
+                //drawProgressBar(xacc,zacc,64,111,40,2,GREEN);
                 
                 
                 len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %d %d %d\r\n", i, xacc, yacc, zacc, gyroX, gyroY, gyroZ);
