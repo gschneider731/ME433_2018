@@ -81,7 +81,7 @@ unsigned char getExpander()
 unsigned char readi2c(unsigned char reg)
 {
     i2c_master_start();
-    i2c_master_send(addr<<1|0);
+    i2c_master_send(addr<<1);
     i2c_master_send(reg);
     i2c_master_restart();
     i2c_master_send(addr<<1|1);
@@ -94,7 +94,7 @@ unsigned char readi2c(unsigned char reg)
 void writei2c(unsigned char reg, unsigned char val)
 {
     i2c_master_start();
-    i2c_master_send(addr<<1|0);
+    i2c_master_send(addr<<1);
     i2c_master_send(reg);
     i2c_master_send(val);
     i2c_master_stop();
