@@ -379,8 +379,6 @@ void APP_Tasks(void) {
     signed short temperature; signed short gyroX; signed short gyroY;
     signed short gyroZ; signed short accelX;
     signed short accelY; signed short accelZ;
-    signed short maf, iir, fir;
-    signed short za[100];
 
     float xacc; float yacc; float zacc;
 
@@ -461,7 +459,7 @@ void APP_Tasks(void) {
              * The isReadComplete flag gets updated in the CDC event handler. */
 
              /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
-            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
 
@@ -532,40 +530,8 @@ void APP_Tasks(void) {
 
                 //drawProgressBar(xacc,zacc,64,111,40,2,GREEN);
                 
-                //MAF
-                maf = 0;
-                //create data array
-                za[k] = zacc;
-                if(k>=3)
-                {
-                    maf = (za[k] + za[k-1] + za[k-2]) / 3;
-                }
-                else
-                {
-                    maf = za[k];
-                }
                 
-                //IIR
-                if(k==1)
-                {
-                    iir = za[k];
-                }
-                iir = 0.8 * iir + 0.2 * za[k];
-                
-                //FIR
-                if(k>=5)
-                {
-                    fir = 0.125*za[k-4] + 0.25*za[k-3] + 0.25*za[k-2] + 0.25*za[k-1] + 0.125*za[k];
-                }
-                else
-                {
-                    fir = za[k];
-                }
-                
-                
-                
-                //len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %d %d %d\r\n", i, xacc, yacc, zacc, gyroX, gyroY, gyroZ);
-                len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %3.1f\r\n", i, zacc, maf, iir, fir);
+                len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %d %d %d\r\n", i, xacc, yacc, zacc, gyroX, gyroY, gyroZ);
                 i++; // increment the index so we see a change in the text
             }
             /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */

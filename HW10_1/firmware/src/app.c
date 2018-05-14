@@ -65,6 +65,8 @@ uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 1;
 int startTime = 0; // to remember the loop time
 int j; int k;
+signed short za [100];
+signed short oldiir = 0;
 
 // *****************************************************************************
 /* Application Data
@@ -332,6 +334,17 @@ void APP_Initialize(void) {
 
     /* Set up the read buffer */
     appData.readBuffer = &readBuffer[0];
+    
+    __builtin_mtc0(_CP0_CONFIG, _CP0_CONFIG_SELECT, 0xa4210583);
+
+    // 0 data RAM access wait states
+    BMXCONbits.BMXWSDRM = 0x0;
+
+    // enable multi vector interrupts
+    INTCONbits.MVEC = 0x1;
+
+    // disable JTAG to get pins back
+    DDPCONbits.JTAGEN = 0;
 
     /* PUT YOUR LCD, IMU, AND PIN INITIALIZATIONS HERE */
     #define PB PORTBbits.RB4
@@ -380,7 +393,6 @@ void APP_Tasks(void) {
     signed short gyroZ; signed short accelX;
     signed short accelY; signed short accelZ;
     signed short maf, iir, fir;
-    signed short za[100];
 
     float xacc; float yacc; float zacc;
 
@@ -438,7 +450,7 @@ void APP_Tasks(void) {
                 {
                     j = 1;
                     k = 0;
-                    appData.state = APP_STATE_CHECK_TIMER;
+                    //appData.state = APP_STATE_CHECK_TIMER;
                     break;
                 }
 
@@ -532,40 +544,47 @@ void APP_Tasks(void) {
 
                 //drawProgressBar(xacc,zacc,64,111,40,2,GREEN);
                 
+                maf = 112;
+                iir = 112;
+                fir = 112;
                 //MAF
-                maf = 0;
+                
                 //create data array
                 za[k] = zacc;
-                if(k>=3)
+                if(k>=2)
                 {
                     maf = (za[k] + za[k-1] + za[k-2]) / 3;
                 }
                 else
                 {
-                    maf = za[k];
+                    maf = zacc;
                 }
                 
                 //IIR
-                if(k==1)
+                if(k==0)
                 {
-                    iir = za[k];
+                    iir = zacc;
                 }
-                iir = 0.8 * iir + 0.2 * za[k];
-                
+                else
+                {
+                    iir = 0.8 * oldiir + 0.2 * za[k];
+                }
+                oldiir = iir;
+                    
                 //FIR
-                if(k>=5)
+                if(k>=4)
                 {
                     fir = 0.125*za[k-4] + 0.25*za[k-3] + 0.25*za[k-2] + 0.25*za[k-1] + 0.125*za[k];
                 }
                 else
                 {
-                    fir = za[k];
+                    fir = zacc;
                 }
                 
                 
                 
                 //len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %d %d %d\r\n", i, xacc, yacc, zacc, gyroX, gyroY, gyroZ);
-                len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %3.1f\r\n", i, zacc, maf, iir, fir);
+                len = sprintf(dataOut, "%d %3.1f %3.1f %3.1f %3.1f\r\n", k, zacc, maf, iir, fir);
                 i++; // increment the index so we see a change in the text
             }
             /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
