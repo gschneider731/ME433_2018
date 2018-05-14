@@ -65,8 +65,8 @@ uint8_t APP_MAKE_BUFFER_DMA_READY readBuffer[APP_READ_BUFFER_SIZE];
 int len, i = 1;
 int startTime = 0; // to remember the loop time
 int j; int k;
-signed short za [100];
-signed short oldiir = 0;
+float za [100];
+float oldiir = 0;
 
 // *****************************************************************************
 /* Application Data
@@ -389,12 +389,11 @@ void APP_Tasks(void) {
     char readdata[15];
     unsigned char whoami;
 
-    signed short temperature; signed short gyroX; signed short gyroY;
-    signed short gyroZ; signed short accelX;
-    signed short accelY; signed short accelZ;
-    signed short maf, iir, fir;
+    signed short temperature, gyroX, gyroY, gyroZ;
+    float accelX, accelY, accelZ;
+    float maf, iir, fir;
 
-    float xacc; float yacc; float zacc;
+    float xacc, yacc, zacc;
 
     switch (appData.state) {
         case APP_STATE_INIT:
@@ -473,7 +472,7 @@ void APP_Tasks(void) {
              * The isReadComplete flag gets updated in the CDC event handler. */
 
              /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
-            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
 
@@ -523,9 +522,13 @@ void APP_Tasks(void) {
                 accelZ=(readdata[13]<<8)|readdata[12];
 
                 //scale 16000 to 40
-                xacc = accelX/400;
-                yacc = accelY/400;
-                zacc = -accelZ/400;
+                //xacc = accelX/400;
+                //yacc = accelY/400;
+                //zacc = -accelZ/400;
+                //scale 16000 to 40
+                xacc = accelX;
+                yacc = accelY;
+                zacc = -accelZ;
                 
                 sprintf(message,"TEMPERATURE: %d",temperature);
                 drawString(1,9,message,WHITE,BLACK);
@@ -544,6 +547,7 @@ void APP_Tasks(void) {
 
                 //drawProgressBar(xacc,zacc,64,111,40,2,GREEN);
                 
+                //random values for debug
                 maf = 112;
                 iir = 112;
                 fir = 112;

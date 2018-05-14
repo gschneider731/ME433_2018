@@ -1,0 +1,10 @@
+I'm still working out an issue where I often receive values of zero from the accelerometer,
+but the data can still be filtered. 
+
+Looking at the plotted results, the MAF tends to most closely follow the noisy data,
+while the IIR and FIR follow the overall data trend more closely. However, the IIR tends 
+to take more time to reflect changes, and therefore I believe the FIR is the best filter
+for filtering the data accurately.
+
+That said, the FIR and MAF used require more data points than the IIR, which makes IIR a 
+good choice if you do not want to store as much data.
