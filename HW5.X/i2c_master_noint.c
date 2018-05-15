@@ -1,6 +1,6 @@
 #include<xc.h>
 #include "i2c_master_noint.h"
-#define addr 0b00100001
+#define addr 0b0100000
 
 // I2C Master utilities, 100 kHz, using polling rather than interrupts
 // The functions must be callled in the correct order as per the I2C protocol
@@ -56,16 +56,14 @@ void initExpander()
     ANSELBbits.ANSB3 = 0;
     //i2c_master_setup();
     
-    i2c_master_start();
-    i2c_master_send(addr<<1);
-    i2c_master_send(0x00);
-    i2c_master_send(0b11110000);
-    i2c_master_stop();
+    i2c_master_setup();
+    writei2c(0x00,0b11110000);    
+    writei2c(0x0A,0b00001111);
 }
 
 void setExpander(unsigned char pin, unsigned char level)
 {
-    unsigned char val = 0x00;
+    unsigned char val = 0b00000000;
     val = (val|level)<<pin;
     unsigned char reg = 0x0A;
     writei2c(reg,val);
@@ -81,7 +79,7 @@ unsigned char getExpander()
 unsigned char readi2c(unsigned char reg)
 {
     i2c_master_start();
-    i2c_master_send(addr<<1);
+    i2c_master_send(addr<<1|0);
     i2c_master_send(reg);
     i2c_master_restart();
     i2c_master_send(addr<<1|1);
@@ -94,7 +92,7 @@ unsigned char readi2c(unsigned char reg)
 void writei2c(unsigned char reg, unsigned char val)
 {
     i2c_master_start();
-    i2c_master_send(addr<<1);
+    i2c_master_send(addr<<1|0);
     i2c_master_send(reg);
     i2c_master_send(val);
     i2c_master_stop();
