@@ -13,15 +13,7 @@
         android:orientation="vertical"
         android:visibility="visible">
 
-    </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Move the bar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <SeekBar
         android:id="@+id/seek1"
@@ -67,6 +59,8 @@
             android:background="@android:color/holo_green_light"
             />
     </ScrollView>
+
+    </LinearLayout>
 
 
 </android.support.constraint.ConstraintLayout>
