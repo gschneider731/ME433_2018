@@ -159,9 +159,7 @@ public class MainActivity extends AppCompatActivity {
         myControl = (SeekBar) findViewById(R.id.seek1);
 
         myTextView = (TextView) findViewById(R.id.textView01);
-        myTextView.setText("Move the bar!");
-
-        setMyControlListener();
+        myTextView.setText("The value is: 20");
 
         myTextView2 = (TextView) findViewById(R.id.textView02);
         myScrollView = (ScrollView) findViewById(R.id.ScrollView01);
@@ -179,6 +177,8 @@ public class MainActivity extends AppCompatActivity {
                 myTextView2.setText("value on click is "+myControl.getProgress());
             }
         });
+
+        setMyControlListener();
 
         manager = (UsbManager) getSystemService(Context.USB_SERVICE);
     }
