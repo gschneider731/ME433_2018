@@ -121,7 +121,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
                 // in the row, see where there is not black
                 for (int i = 0; i < bmp.getWidth(); i++) {
-                    if ((green(pixels[i]) > thresh) && (red(pixels[i]) > thresh) && (blue(pixels[i]) > thresh)){
+                    if ((green(pixels[i]) > thresh) || (red(pixels[i]) > thresh) || (blue(pixels[i]) > thresh)){
                         pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
                         rowXsum = rowXsum + i;
                         count = count + 1;
@@ -161,8 +161,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChanged = progress;
-                myProgressView.setText("The value is: "+progress);
+                progressChanged = progress + 80;
+                myProgressView.setText("The value is: "+(progress+80));
             }
 
             @Override
