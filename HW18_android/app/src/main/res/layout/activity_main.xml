@@ -29,8 +29,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:progress="30"
-            android:secondaryProgress="30"
+            android:progress="70"
+            android:secondaryProgress="70"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             />

@@ -77,7 +77,8 @@ float oldiir = 0;
 char rx[64]; // the raw data
 int rxPos = 0; // how much data has been stored
 int gotRx = 0; // the flag
-int rxVal = 0; // a place to store the int that was received
+int rxVal1 = 0; // a place to store the int that was received
+int rxVal2 = 0; // a place to store the int that was received
 
 // *****************************************************************************
 /* Application Data
@@ -479,7 +480,7 @@ void APP_Tasks(void) {
                     // if you got a newline
                     if (appData.readBuffer[ii] == '\n' || appData.readBuffer[ii] == '\r') {
                         rx[rxPos] = 0; // end the array
-                        sscanf(rx, "%d", &rxVal); // get the int out of the array
+                        sscanf(rx, "%d %d", &rxVal1, &rxVal2); // get the int out of the array
                         gotRx = 1; // set the flag
                         break; // get out of the while loop
                     } else if (appData.readBuffer[ii] == 0) {
@@ -511,12 +512,13 @@ void APP_Tasks(void) {
              * The isReadComplete flag gets updated in the CDC event handler. */
 
              /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
-            if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+            if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 20)) {
                 
-                //OC1RS = 23 * rxVal;
-                //OC4RS = 23 * rxVal;
-                OC1RS = rxVal;
-                OC4RS = rxVal;
+                //OC1RS = 23 * rxVal1;
+                //OC4RS = 23 * rxVal1;
+                
+                OC1RS = 20 * rxVal1;
+                OC4RS = 20 * rxVal2;
                 
                 
                 appData.state = APP_STATE_SCHEDULE_WRITE;
@@ -541,7 +543,7 @@ void APP_Tasks(void) {
             appData.state = APP_STATE_WAIT_FOR_WRITE_COMPLETE;
             
             if (gotRx) {
-                len = sprintf(dataOut, "got: %d\r\n", rxVal);
+                len = sprintf(dataOut, "got: %d %d\r\n", rxVal1, rxVal2);
                 i++;
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,

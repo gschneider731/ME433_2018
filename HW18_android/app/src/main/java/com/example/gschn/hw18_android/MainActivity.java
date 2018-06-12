@@ -63,8 +63,11 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     TextView myTextView;
 
     static long prevtime = 0; // for FPS calculation
-    static int progressChanged = 0;
-    static int rowObserved = 50;
+    static int progressChanged = 30;
+    static int[] rowObserved = {100,200,300,400};
+    int[] pos = {999,999,999,999};
+
+
 
     //SeekBar myControl2;
     //TextView myTextView1;
@@ -276,8 +279,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     // the important function
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        int rowXsum = 0;
-        int count = 0;
+        int[] rowXsum = {0,0,0,0};
+        int[] count = {0,0,0,0};
         // every time there is a new Camera preview frame
         mTextureView.getBitmap(bmp);
 
@@ -285,37 +288,48 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         if (c != null) {
             int thresh = progressChanged; // comparison value
             int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
-            int startY = rowObserved; // which row in the bitmap to analyze to read
-            //for (int startY = 0; startY < bmp.getHeight(); startY += 5) {
-            bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
 
-            // in the row, see where there is not black
-            for (int i = 0; i < bmp.getWidth(); i++) {
-                if ((green(pixels[i]) > thresh) || (red(pixels[i]) > thresh) || (blue(pixels[i]) > thresh)){
-                    pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
-                    rowXsum = rowXsum + i;
-                    count = count + 1;
+            for (int j = 0; j < rowObserved.length; j++) {
+                int startY = rowObserved[j]; // which row in the bitmap to analyze to read
+                //for (int startY = 0; startY < bmp.getHeight(); startY += 5) {
+                bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+
+                // in the row, see where there is not black
+                for (int i = 0; i < bmp.getWidth(); i++) {
+                    //if ((green(pixels[i]) - red(pixels[i]) > thresh) || (red(pixels[i]) > thresh) || (blue(pixels[i]) > thresh)){
+                    if ((green(pixels[i]) - red(pixels[i]) > thresh) && (green(pixels[i]) - blue(pixels[i]) > thresh)) {
+                        pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
+                        rowXsum[j] = rowXsum[j] + i;
+                        count[j] = count[j] + 1;
+                    }
                 }
+
+                if (count[j] == 0) {
+                    count[j] = 1;
+                }
+
+                // update the row
+                bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+
+                // draw a circle at some position
+                pos[j] = (int) rowXsum[j] / count[j];
+                canvas.drawCircle(pos[j], rowObserved[j], 5, paint1); // x position, y position, diameter, color
+
+//                // write the pos as text
+//                canvas.drawText("pos = " + pos[j], 10, rowObserved[j], paint1);
+//                c.drawBitmap(bmp, 0, 0, null);
+//                mSurfaceHolder.unlockCanvasAndPost(c);
             }
 
-            if (count == 0)
-            {
-                count = 1;
-            }
-
-            // update the row
-            bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
-
-            //}
         }
-        // draw a circle at some position
-        int pos = (int) rowXsum / count;
-        canvas.drawCircle(pos, rowObserved, 5, paint1); // x position, y position, diameter, color
-
-        // write the pos as text
-        canvas.drawText("pos = " + pos, 10, 200, paint1);
-        c.drawBitmap(bmp, 0, 0, null);
-        mSurfaceHolder.unlockCanvasAndPost(c);
+//        // draw a circle at some position
+//        int[] pos = (int) rowXsum / count;
+//        canvas.drawCircle(pos, rowObserved, 5, paint1); // x position, y position, diameter, color
+//
+//        // write the pos as text
+//        canvas.drawText("pos = " + pos, 10, 200, paint1);
+//        c.drawBitmap(bmp, 0, 0, null);
+//        mSurfaceHolder.unlockCanvasAndPost(c);
 
         // calculate the FPS to see how fast the code is running
         long nowtime = System.currentTimeMillis();
@@ -325,16 +339,37 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
         int midpoint = (int) bmp.getWidth() / 2;
         int maxspeed = 2000; //max actual is 2399
-        int distance = (int) abs(pos - midpoint);
-        int powerRatingLeft = (int) 100 * distance / midpoint;
-        int powerRatingRight = (int) 100 * distance / midpoint;
-        int powerRating = powerRatingLeft + powerRatingRight;
+        //int distance = (int) abs(pos - midpoint);
 
-        String sendString = String.valueOf(powerRating) + '\n';
+        int powerRatingLeft;
+        int powerRatingRight;
+
+        //if turn right
+        if(pos[3] > pos[4])
+        {
+            powerRatingLeft = 40;// (int) * distance / midpoint;
+            powerRatingRight = 0;
+
+
+        }
+        //if turn left
+        else if(pos[3] < pos[4])
+        {
+            powerRatingLeft = 0;
+            powerRatingRight = 40 ;
+
+        }
+        else
+        {
+            powerRatingLeft = 20;
+            powerRatingRight = 20 ;
+        }
+
+        String sendString = String.valueOf((powerRatingLeft) +" "+ (powerRatingRight) + '\n');
         try {
             sPort.write(sendString.getBytes(), 10); // 10 is the timeout
         } catch (IOException e) { }
-        myTextView2.setText("pos "+pos+" mp "+midpoint+" dist "+distance+" pr "+powerRating);
+        //myTextView2.setText("pos3 "+pos[3]+" pos4 "+pos[4]+" prL "+powerRatingLeft+" prR "+powerRatingRight);
     }
 
     private void setMyControlListener() {
@@ -344,7 +379,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChanged = progress + 80;
+                progressChanged = progress + 30;
                 myProgressView.setText("The value is: "+(progress+80));
             }
 
