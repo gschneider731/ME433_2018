@@ -81,18 +81,14 @@ int rxVal = 0; // a place to store the int that was received
 
 // *****************************************************************************
 /* Application Data
-
   Summary:
     Holds application data
-
   Description:
     This structure holds the application's data.
-
   Remarks:
     This structure should be initialized by the APP_Initialize function.
-    
     Application strings and buffers are be defined outside this structure.
-*/
+ */
 
 APP_DATA appData;
 
@@ -103,7 +99,7 @@ APP_DATA appData;
 // *****************************************************************************
 
 /* TODO:  Add any necessary callback functions.
-*/
+ */
 
 /*******************************************************
  * USB CDC Device Events - Application Event Handler
@@ -271,13 +267,11 @@ void APP_USBDeviceEventHandler(USB_DEVICE_EVENT event, void * eventData, uintptr
     }
 }
 
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Local Functions
 // *****************************************************************************
 // *****************************************************************************
-
 
 /*****************************************************
  * This function is called in every step of the
@@ -304,7 +298,6 @@ bool APP_StateReset(void) {
     return (retVal);
 }
 
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Initialization and State Machine Functions
@@ -314,17 +307,14 @@ bool APP_StateReset(void) {
 /*******************************************************************************
   Function:
     void APP_Initialize ( void )
-
   Remarks:
     See prototype in app.h.
  */
 
-void APP_Initialize ( void )
-{
+void APP_Initialize(void) {
     /* Place the App state machine in its initial state. */
     appData.state = APP_STATE_INIT;
 
-    
     /* Device Layer Handle  */
     appData.deviceHandle = USB_DEVICE_HANDLE_INVALID;
 
@@ -366,17 +356,23 @@ void APP_Initialize ( void )
 
     // disable JTAG to get pins back
     DDPCONbits.JTAGEN = 0;
+
+    /* PUT YOUR LCD, IMU, AND PIN INITIALIZATIONS HERE */
+    #define PB PORTBbits.RB4
+    #define LED LATAbits.LATA4
+    #define LCD LATBbits.LATB15
+    #define CS LATAbits.LATA0       // chip select pin
+    #define LSM 0b01101011
     
-    //Motor speeds are controlled by PWM to the gate of the Mosfet. 
-    //The pins attached to the gates are A0 and B13. In the initialization part
-    //of your code, set A0 to OC1 and B13 to OC4.
+    TRISAbits.TRISA4 = 0;
+    TRISBbits.TRISB4 = 1;
+    TRISBbits.TRISB2 = 0;
+    TRISBbits.TRISB3 = 0;
+    TRISBbits.TRISB15 = 0;
     
     RPA0Rbits.RPA0R = 0b0101; // A0 to OC1
     RPB13Rbits.RPB13R = 0b0101; // B13 to OC4
-    
-    //Use Timer2 as the base frequency for the PWM, set to 20kHz. 
-    //Turn on the OCs with 0% duty.
-    
+
     T2CONbits.TCKPS = 0; // Timer2 prescaler N=1 (1:1)
     PR2 = 2399; // 48000000 Hz / 20000 Hz / 1 - 1 = 2399 (20kHz PWM from 48MHz clock with 1:1 prescaler)
     TMR2 = 0; // initial TMR2 count is 0
@@ -389,22 +385,9 @@ void APP_Initialize ( void )
     T2CONbits.ON = 1; // turn on Timer2
     OC1CONbits.ON = 1; // turn on OC1
     OC4CONbits.ON = 1; // turn on OC4
-    
-    //Now at any time you can set the PWM by using OC1RS or OC4RS, 
-    //with values from 0 (off) to 2399 (100% on).
-    
-    //Instead of assuming that the PWM maps directly to the speed of the motor, 
-    //we would like to control the motor velocity using a PI controller using 
-    //feedback from the encoder. The timer peripheral can be used to count 
-    //encoder pulses, and a timer based interrupt can perform the controller math.
-    
-    //A single channel from each motor encoder is connected to pins B9 and B8. 
-    //In the initialization part of your code, set B9 to T5CK and B8 to T3CK.
-    
-    T5CKR = 0b0100; // B9 is read by T5CK
-    T3CKR = 0b0100; // B8 is read by T3CK
-    
-    //Configure Timer5 and Timer3 to count external pulses, and start at 0.
+
+    T5CKRbits.T5CKR = 0b0100; // B9 is read by T5CK
+    T3CKRbits.T3CKR = 0b0100; // B8 is read by T3CK
 
     T5CONbits.TCS = 1; // count external pulses
     PR5 = 0xFFFF; // enable counting to max value of 2^16 - 1
@@ -413,11 +396,8 @@ void APP_Initialize ( void )
     T3CONbits.TCS = 1; // count external pulses
     PR3 = 0xFFFF; // enable counting to max value of 2^16 - 1
     TMR3 = 0; // set the timer count to zero
-    T3CONbits.ON = 1; // turn Timer on and start 
-    
-    //So we have used Timers 2, 3, and 5 so far. Set up Timer 4 as a 500Hz 
-    //interrupt to perform the control math.
-    
+    T3CONbits.ON = 1; // turn Timer on and start counting
+
     T4CONbits.TCKPS = 2; // Timer4 prescaler N=4
     PR4 = 23999; // 48000000 Hz / 500 Hz / 4 - 1 = 23999 (500Hz from 48MHz clock with 4:1 prescaler)
     TMR4 = 0; // initial TMR4 count is 0
@@ -426,26 +406,23 @@ void APP_Initialize ( void )
     IFS0bits.T4IF = 0; // clear interrupt flag for Timer4
     IEC0bits.T4IE = 1; // enable interrupt for Timer4
     
+    startTime = _CP0_GET_COUNT();
 }
-
 
 /******************************************************************************
   Function:
     void APP_Tasks ( void )
-
   Remarks:
     See prototype in app.h.
  */
 
-void APP_Tasks ( void )
-{
+void APP_Tasks(void) {
+    /* Update the application state machine based
+     * on the current state */
 
-    /* Check the application's current state. */
-    switch ( appData.state )
-    {
-        /* Application's initial state. */
+    switch (appData.state) {
         case APP_STATE_INIT:
-        {
+
             /* Open the device layer */
             appData.deviceHandle = USB_DEVICE_Open(USB_DEVICE_INDEX_0, DRV_IO_INTENT_READWRITE);
 
@@ -460,7 +437,6 @@ void APP_Tasks ( void )
             }
 
             break;
-        }
 
         case APP_STATE_WAIT_FOR_CONFIGURATION:
 
@@ -505,11 +481,6 @@ void APP_Tasks ( void )
                         rx[rxPos] = 0; // end the array
                         sscanf(rx, "%d", &rxVal); // get the int out of the array
                         gotRx = 1; // set the flag
-                        
-                        OC1RS = rxVal * 23;
-                        OC4RS = rxVal * 23;
-                        
-                        
                         break; // get out of the while loop
                     } else if (appData.readBuffer[ii] == 0) {
                         break; // there was no newline, get out of the while loop
@@ -541,12 +512,13 @@ void APP_Tasks ( void )
 
              /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
             if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
+                
+                OC1RS = 23 * rxVal;
+                OC4RS = 23 * rxVal;
+                
+                
                 appData.state = APP_STATE_SCHEDULE_WRITE;
             }
-////            if (appData.isReadComplete || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
-////                appData.state = APP_STATE_SCHEDULE_WRITE;
-////            }
-
 
             break;
 
@@ -583,7 +555,8 @@ void APP_Tasks ( void )
                         USB_DEVICE_CDC_TRANSFER_FLAGS_DATA_COMPLETE);
                 startTime = _CP0_GET_COUNT();
             }
-        
+
+            /* IF A LETTER WAS RECEIVED, ECHO IT BACK SO THE USER CAN SEE IT */
             if (appData.isReadComplete) {
                 USB_DEVICE_CDC_Write(USB_DEVICE_CDC_INDEX_0,
                         &appData.writeTransferHandle,
@@ -627,15 +600,3 @@ void APP_Tasks ( void )
 /*******************************************************************************
  End of File
  */
-            
-//        case APP_STATE_SERVICE_TASKS:
-//        {
-//        
-//            OC1RS = 2399;
-//            OC4RS = 2399;
-//            
-//            break;
-//        }
-
-        /* TODO: implement your application state machine.*/
-        

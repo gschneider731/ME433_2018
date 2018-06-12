@@ -29,11 +29,10 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
-    SeekBar Motor1;
-    TextView myTextView1;
-    SeekBar Motor2;
-    TextView myTextView2;
+    SeekBar myControl;
+    TextView myTextView;
     Button button;
+    TextView myTextView2;
     ScrollView myScrollView;
     TextView myTextView3;
 
@@ -157,14 +156,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Motor1 = (SeekBar) findViewById(R.id.seek1);
-        Motor2 = (SeekBar) findViewById(R.id.seek2);
+        myControl = (SeekBar) findViewById(R.id.seek1);
 
-        myTextView1 = (TextView) findViewById(R.id.textView01);
-        myTextView1.setText("The value is: 0");
+        myTextView = (TextView) findViewById(R.id.textView01);
+        myTextView.setText("The value is: 20");
 
         myTextView2 = (TextView) findViewById(R.id.textView02);
-        myTextView2.setText("The value is: 0");
         myScrollView = (ScrollView) findViewById(R.id.ScrollView01);
         myTextView3 = (TextView) findViewById(R.id.textView03);
         button = (Button) findViewById(R.id.button1);
@@ -173,53 +170,28 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String sendString = String.valueOf(Motor1.getProgress() + '\n');
+                String sendString = String.valueOf(myControl.getProgress()) + '\n';
                 try {
                     sPort.write(sendString.getBytes(), 10); // 10 is the timeout
                 } catch (IOException e) { }
-                //myTextView2.setText("value on click is "+Motor1.getProgress());
+                myTextView2.setText("value on click is "+myControl.getProgress());
             }
         });
 
-        setMotor1Listener();
-        setMotor2Listener();
+        setMyControlListener();
 
         manager = (UsbManager) getSystemService(Context.USB_SERVICE);
     }
 
-    private void setMotor1Listener() {
-        Motor1.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+    private void setMyControlListener() {
+        myControl.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
-            int progressChanged1 = 0;
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress1, boolean fromUser) {
-                progressChanged1 = progress1;
-                myTextView1.setText("The value is: "+(progress1*23));
-            }
+            int progressChanged = 0;
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-
-            }
-
-
-        });
-    }
-
-    private void setMotor2Listener() {
-        Motor2.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-            int progressChanged2 = 0;
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress2, boolean fromUser) {
-                progressChanged2 = progress2;
-                myTextView2.setText("The value is: "+(progress2*23));
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+                myTextView.setText("The value is: "+progress);
             }
 
             @Override
