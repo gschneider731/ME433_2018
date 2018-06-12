@@ -513,8 +513,10 @@ void APP_Tasks(void) {
              /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
             if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 5)) {
                 
-                OC1RS = 23 * rxVal;
-                OC4RS = 23 * rxVal;
+                //OC1RS = 23 * rxVal;
+                //OC4RS = 23 * rxVal;
+                OC1RS = rxVal;
+                OC4RS = rxVal;
                 
                 
                 appData.state = APP_STATE_SCHEDULE_WRITE;
