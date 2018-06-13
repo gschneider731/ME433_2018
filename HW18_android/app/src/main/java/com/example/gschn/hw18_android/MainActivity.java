@@ -64,8 +64,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     static long prevtime = 0; // for FPS calculation
     static int progressChanged = 30;
-    static int[] rowObserved = {100,200,300,400};
-    int[] pos = {999,999,999,999};
+    static int rowObserved = 100;
+    int pos1 = 0; int pos2 = 0; int pos3 = 0; int pos4 = 0;
 
 
 
@@ -279,8 +279,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
     // the important function
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        int[] rowXsum = {0,0,0,0};
-        int[] count = {0,0,0,0};
+        //int[] rowXsum1 = {0,0,0,0};
+        //int[] count1 = {0,0,0,0};
+        int rowXsum1 = 0;
+        int count1 = 0;
+        //int rowXsum2 = 0;
+        //int count2 = 0;
         // every time there is a new Camera preview frame
         mTextureView.getBitmap(bmp);
 
@@ -289,47 +293,82 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             int thresh = progressChanged; // comparison value
             int[] pixels = new int[bmp.getWidth()]; // pixels[] is the RGBA data
 
-            for (int j = 0; j < rowObserved.length; j++) {
-                int startY = rowObserved[j]; // which row in the bitmap to analyze to read
-                //for (int startY = 0; startY < bmp.getHeight(); startY += 5) {
-                bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+            //int jcount = 0;
+            //for (int j = 0; j < rowObserved; j+=100) {
 
-                // in the row, see where there is not black
-                for (int i = 0; i < bmp.getWidth(); i++) {
-                    //if ((green(pixels[i]) - red(pixels[i]) > thresh) || (red(pixels[i]) > thresh) || (blue(pixels[i]) > thresh)){
-                    if ((green(pixels[i]) - red(pixels[i]) > thresh) && (green(pixels[i]) - blue(pixels[i]) > thresh)) {
-                        pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
-                        rowXsum[j] = rowXsum[j] + i;
-                        count[j] = count[j] + 1;
+                //int startY = rowObserved; // which row in the bitmap to analyze to read
+                for (int startY = 0; startY < bmp.getHeight(); startY += 100) {
+                    bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+
+                    // in the row, see where there is not black
+                    for (int i = 0; i < bmp.getWidth(); i++) {
+                        //if ((green(pixels[i]) - red(pixels[i]) > thresh) || (red(pixels[i]) > thresh) || (blue(pixels[i]) > thresh)){
+                        if ((green(pixels[i]) - red(pixels[i]) > thresh) && (green(pixels[i]) - blue(pixels[i]) > thresh)) {
+                            pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
+                            rowXsum1 = rowXsum1 + i;
+                            count1 = count1 + 1;
+                            //rowXsum1[jcount] = rowXsum1[jcount] + i;
+                            //count1[jcount] = count1[jcount] + 1;
+                        }
                     }
+
+                    //if (count1[jcount] == 0) {
+                    //    count1[jcount] = 1;
+                    //}
+
+                    if (count1 == 0) {
+                        count1 = 1;
+                    }
+
+                    if(startY == 100)
+                    {
+                        pos1 = (int) rowXsum1/ count1;
+                    }
+                    if(startY == 200)
+                    {
+                        pos2 = (int) rowXsum1/ count1;
+                    }
+                    if(startY == 300)
+                    {
+                        pos3 = (int) rowXsum1/ count1;
+                    }
+                    if(startY == 400)
+                    {
+                        pos4 = (int) rowXsum1/ count1;
+                    }
+
+                    // update the row
+                    bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+
+                    //jcount++;
                 }
 
-                if (count[j] == 0) {
-                    count[j] = 1;
-                }
-
-                // update the row
-                bmp.setPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
-
-                // draw a circle at some position
-                pos[j] = (int) rowXsum[j] / count[j];
-                canvas.drawCircle(pos[j], rowObserved[j], 5, paint1); // x position, y position, diameter, color
+//                // draw a circle at some position
+//                pos = (int) rowXsum / count;
+//                canvas.drawCircle(pos, rowObserved, 5, paint1); // x position, y position, diameter, color
 
 //                // write the pos as text
 //                canvas.drawText("pos = " + pos[j], 10, rowObserved[j], paint1);
 //                c.drawBitmap(bmp, 0, 0, null);
 //                mSurfaceHolder.unlockCanvasAndPost(c);
-            }
+            //}
 
         }
-//        // draw a circle at some position
-//        int[] pos = (int) rowXsum / count;
-//        canvas.drawCircle(pos, rowObserved, 5, paint1); // x position, y position, diameter, color
-//
-//        // write the pos as text
-//        canvas.drawText("pos = " + pos, 10, 200, paint1);
-//        c.drawBitmap(bmp, 0, 0, null);
-//        mSurfaceHolder.unlockCanvasAndPost(c);
+        // draw a circle at some position
+        //pos1 = (int) rowXsum1[1] / count1[1];
+        //pos2 = (int) rowXsum1[2] / count1[2];
+        //pos3 = (int) rowXsum1[3] / count1[3];
+        //pos4 = (int) rowXsum1[4] / count1[4];
+        //pos1 = (int) rowXsum1/ count1;
+        canvas.drawCircle(pos1, 100, 5, paint1); // x position, y position, diameter, color
+        //canvas.drawCircle(pos2, 200, 5, paint1);
+        //canvas.drawCircle(pos3, 300, 5, paint1);
+        //canvas.drawCircle(pos4, 400, 5, paint1);
+
+        // write the pos as text
+        canvas.drawText("pos = " + pos2, 10, 200, paint1);
+        c.drawBitmap(bmp, 0, 0, null);
+        mSurfaceHolder.unlockCanvasAndPost(c);
 
         // calculate the FPS to see how fast the code is running
         long nowtime = System.currentTimeMillis();
@@ -345,7 +384,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         int powerRatingRight;
 
         //if turn right
-        if(pos[3] > pos[4])
+        if(pos2 > pos3)
         {
             powerRatingLeft = 40;// (int) * distance / midpoint;
             powerRatingRight = 0;
@@ -353,7 +392,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
         }
         //if turn left
-        else if(pos[3] < pos[4])
+        else if(pos2 < pos3)
         {
             powerRatingLeft = 0;
             powerRatingRight = 40 ;
@@ -369,7 +408,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         try {
             sPort.write(sendString.getBytes(), 10); // 10 is the timeout
         } catch (IOException e) { }
-        //myTextView2.setText("pos3 "+pos[3]+" pos4 "+pos[4]+" prL "+powerRatingLeft+" prR "+powerRatingRight);
+        myTextView2.setText("pos2 "+pos2+" pos3 "+pos3+" prL "+powerRatingLeft+" prR "+powerRatingRight);
     }
 
     private void setMyControlListener() {
