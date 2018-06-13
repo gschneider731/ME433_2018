@@ -512,7 +512,8 @@ void APP_Tasks(void) {
              * The isReadComplete flag gets updated in the CDC event handler. */
 
              /* WAIT FOR 5HZ TO PASS OR UNTIL A LETTER IS RECEIVED */
-            if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 20)) {
+            //if (gotRx || _CP0_GET_COUNT() - startTime > (48000000 / 2 / 100)) {
+            if(gotRx){
                 
                 //OC1RS = 23 * rxVal1;
                 //OC4RS = 23 * rxVal1;

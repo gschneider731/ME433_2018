@@ -66,15 +66,15 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
     static int progressChanged = 30;
     static int rowObserved = 100;
     int pos1 = 0; int pos2 = 0; int pos3 = 0; int pos4 = 0;
-
+    int k = 0;
 
 
     //SeekBar myControl2;
     //TextView myTextView1;
     //Button button;
     TextView myTextView2;
-    ScrollView myScrollView;
-    TextView myTextView3;
+    //ScrollView myScrollView;
+    //TextView myTextView3;
 
     private UsbManager manager;
     private UsbSerialPort sPort;
@@ -184,8 +184,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         String rxString = null;
         try {
             rxString = new String(data, "UTF-8"); // put the data you got into a string
-            myTextView3.append(rxString);
-            myScrollView.fullScroll(View.FOCUS_DOWN);
+            //myTextView3.append(rxString);
+            //myScrollView.fullScroll(View.FOCUS_DOWN);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -209,8 +209,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 //        myTextView1.setText("The value is: 20");
 
         myTextView2 = (TextView) findViewById(R.id.textView02);
-        myScrollView = (ScrollView) findViewById(R.id.ScrollView01);
-        myTextView3 = (TextView) findViewById(R.id.textView03);
+        //myScrollView = (ScrollView) findViewById(R.id.ScrollView01);
+        //myTextView3 = (TextView) findViewById(R.id.textView03);
         //button = (Button) findViewById(R.id.button1);
 
         setMyControlListener();
@@ -298,8 +298,11 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
                 //int startY = rowObserved; // which row in the bitmap to analyze to read
                 //for (int startY = 0; startY < bmp.getHeight(); startY += 100) {
-                for (int startY = 200; startY < 280; startY += 20) {
+                for (int startY = 100; startY < 280; startY += 40) {
                     bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
+
+                    rowXsum1 = 0;
+                    count1 = 0;
 
                     // in the row, see where there is not black
                     for (int i = 0; i < bmp.getWidth(); i+=2) {
@@ -321,15 +324,15 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                         count1 = 1;
                     }
 
-                    if(startY == 200)
+                    if(startY == 140)
                     {
                         pos1 = (int) rowXsum1/ count1;
                     }
-                    if(startY == 220)
+                    if(startY == 180)
                     {
                         pos2 = (int) rowXsum1/ count1;
                     }
-                    if(startY == 240)
+                    if(startY == 220)
                     {
                         pos3 = (int) rowXsum1/ count1;
                     }
@@ -381,30 +384,67 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         int maxspeed = 2000; //max actual is 2399
         //int distance = (int) abs(pos - midpoint);
 
-        int powerRatingLeft;
-        int powerRatingRight;
+        int powerRatingLeft=0;
+        int powerRatingRight=0;
 
-        //if turn right
-        if(pos2 - pos3 > 10)
+//        try {
+//            wait(2);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
+        int middleline = (pos1 + pos2 + pos3 + pos4) / 4;
+
+
+        if(pos2 >= pos3+1)
         {
-            powerRatingLeft = 40;// (int) * distance / midpoint;
+            powerRatingLeft = 50;// (int) * distance / midpoint;
             powerRatingRight = 0;
-
-
         }
-        //if turn left
-        else if(pos3 - pos2 > 10)
+        else if(pos2 < pos3+1)
         {
-            powerRatingLeft = 0;
-            powerRatingRight = 40 ;
-
+            powerRatingLeft = 0;// (int) * distance / midpoint;
+            powerRatingRight = 50;
         }
         else
         {
-            powerRatingLeft = 20;
-            powerRatingRight = 20
-            ;
+            powerRatingLeft = 25;// (int) * distance / midpoint;
+            powerRatingRight = 25;
         }
+
+        //if ( k == 0) {
+//            if (pos2 < middleline + 1 && pos2 >= middleline - 1) {
+//                powerRatingLeft = 20;
+//                powerRatingRight = 20;
+//            }
+//
+//            //if turn right
+//            else if (pos2 >= middleline + 1)
+//
+//
+//            {
+//                powerRatingLeft = 20;// (int) * distance / midpoint;
+//                powerRatingRight = 0;
+//
+//
+//            }
+//            //if turn left
+//            else if (middleline - 1 > pos2) {
+//                powerRatingLeft = 0;
+//                powerRatingRight = 20;
+//
+//            } else {
+//                powerRatingLeft = 35;
+//                powerRatingRight = 0;
+//            }
+//            k = 1;
+        //}
+        //else
+        //{
+        //    k=0;
+        //    powerRatingLeft = 0;
+        //    powerRatingRight = 0;
+        //}
 
         String sendString = String.valueOf((powerRatingLeft) +" "+ (powerRatingRight) + '\n');
         try {
