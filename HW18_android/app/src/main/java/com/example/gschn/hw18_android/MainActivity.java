@@ -297,11 +297,12 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
             //for (int j = 0; j < rowObserved; j+=100) {
 
                 //int startY = rowObserved; // which row in the bitmap to analyze to read
-                for (int startY = 0; startY < bmp.getHeight(); startY += 100) {
+                //for (int startY = 0; startY < bmp.getHeight(); startY += 100) {
+                for (int startY = 200; startY < 280; startY += 20) {
                     bmp.getPixels(pixels, 0, bmp.getWidth(), 0, startY, bmp.getWidth(), 1);
 
                     // in the row, see where there is not black
-                    for (int i = 0; i < bmp.getWidth(); i++) {
+                    for (int i = 0; i < bmp.getWidth(); i+=2) {
                         //if ((green(pixels[i]) - red(pixels[i]) > thresh) || (red(pixels[i]) > thresh) || (blue(pixels[i]) > thresh)){
                         if ((green(pixels[i]) - red(pixels[i]) > thresh) && (green(pixels[i]) - blue(pixels[i]) > thresh)) {
                             pixels[i] = rgb(0, 255, 0); // over write the pixel with pure green
@@ -320,19 +321,19 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
                         count1 = 1;
                     }
 
-                    if(startY == 100)
+                    if(startY == 200)
                     {
                         pos1 = (int) rowXsum1/ count1;
                     }
-                    if(startY == 200)
+                    if(startY == 220)
                     {
                         pos2 = (int) rowXsum1/ count1;
                     }
-                    if(startY == 300)
+                    if(startY == 240)
                     {
                         pos3 = (int) rowXsum1/ count1;
                     }
-                    if(startY == 400)
+                    if(startY == 260)
                     {
                         pos4 = (int) rowXsum1/ count1;
                     }
@@ -384,7 +385,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         int powerRatingRight;
 
         //if turn right
-        if(pos2 > pos3)
+        if(pos2 - pos3 > 10)
         {
             powerRatingLeft = 40;// (int) * distance / midpoint;
             powerRatingRight = 0;
@@ -392,7 +393,7 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
 
         }
         //if turn left
-        else if(pos2 < pos3)
+        else if(pos3 - pos2 > 10)
         {
             powerRatingLeft = 0;
             powerRatingRight = 40 ;
@@ -401,7 +402,8 @@ public class MainActivity extends Activity implements TextureView.SurfaceTexture
         else
         {
             powerRatingLeft = 20;
-            powerRatingRight = 20 ;
+            powerRatingRight = 20
+            ;
         }
 
         String sendString = String.valueOf((powerRatingLeft) +" "+ (powerRatingRight) + '\n');
